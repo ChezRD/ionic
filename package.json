@@ -23,7 +23,7 @@
     "test": "gulp validate",
     "test:generators": "jasmine-node ./tooling/spec",
     "link": "gulp release.prepareReleasePackage && cd dist/ionic-angular && npm link",
-    "compile": "gulp release.prepareReleasePackage && cp -R dist/ionic-angular/fonts ./ && cp -R dist/ionic-angular/themes ./ && cp -R dist/ionic-angular/polyfills ./",
+    "compile": "gulp release.prepareReleasePackage && cp -R dist/ionic-angular ./../ && rm -rf dist",
     "tsc": "tsc --outdir .tmp"
   },
   "dependencies": {
@@ -140,9 +140,6 @@
     "webpack": "^2.1.0-beta.27",
     "yargs": "5.0.0"
   },
-  "main": "dist/ionic-angular/umd/index.js",
-  "module": "dist/ionic-angular/index.js",
-  "es2015": "dist/ionic-angular/es2015/index.js",
   "config": {
     "commitizen": {
       "path": "node_modules/ionic-cz-conventional-changelog"
