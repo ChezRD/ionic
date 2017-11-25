@@ -806,7 +806,10 @@ export class NavControllerBase extends Ion implements NavController {
     if (enteringView || leavingView) {
       this._zone.run(() => {
         // Here, the order is important. WillLeave must be called before WillEnter.
-        leavingView && this._willLeave(leavingView, !enteringView);
+        if (leavingView) {
+          const willUnload = enteringView ? leavingView.index > enteringView.index : true;
+          this._willLeave(leavingView, willUnload);
+        }
         enteringView && this._willEnter(enteringView);
       });
     }
@@ -858,6 +861,7 @@ export class NavControllerBase extends Ion implements NavController {
   _cleanup(activeView: ViewController) {
     // ok, cleanup time!! Destroy all of the views that are
     // INACTIVE and come after the active view
+
     // only do this if the views exist, though
     if (!this._destroyed) {
       const activeViewIndex = this._views.indexOf(activeView);
@@ -1025,6 +1029,8 @@ export class NavControllerBase extends Ion implements NavController {
     // Unregister navcontroller
     if (this.parent && this.parent.unregisterChildNav) {
       this.parent.unregisterChildNav(this);
+    } else if (this._app) {
+      this._app.unregisterRootNav(this);
     }
 
     this._destroyed = true;
@@ -1119,7 +1125,8 @@ export class NavControllerBase extends Ion implements NavController {
       view = this.getActive();
     }
     const views = this._views;
-    return views[views.indexOf(view) - 1];
+    const index = views.indexOf(view);
+    return (index > 0) ? views[index - 1] : null;
   }
 
   first(): ViewController {
@@ -1129,7 +1136,8 @@ export class NavControllerBase extends Ion implements NavController {
 
   last(): ViewController {
     // returns the last page in this nav controller's stack.
-    return this._views[this._views.length - 1];
+    const views = this._views;
+    return views[views.length - 1];
   }
 
   indexOf(view: ViewController): number {
@@ -1141,9 +1149,6 @@ export class NavControllerBase extends Ion implements NavController {
     return this._views.length;
   }
 
-  /**
-   * Return the stack of views in this NavController.
-   */
   getViews(): Array<ViewController> {
     return this._views;
   }

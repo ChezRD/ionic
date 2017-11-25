@@ -315,7 +315,7 @@ import { NavigationContainer } from './navigation-container';
  *   ){}
  *   ionViewCanEnter(): boolean{
  *    // here we can either return true or false
- *    // depending on if we want to leave this view
+ *    // depending on if we want to enter this view
  *    if(isValid(randomValue)){
  *       return true;
  *     } else {
@@ -580,7 +580,6 @@ export abstract class NavController implements NavigationContainer {
    * @returns {number} The number of views in this stack, including the current view.
    */
   abstract length(): number;
-
 
   /**
    * Returns the current stack of views in this nav controller.

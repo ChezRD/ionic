@@ -1,3 +1,199 @@
+<a name="3.9.2"></a>
+## [3.9.2](https://github.com/ionic-team/ionic/compare/v3.9.1...v3.9.2) (2017-11-08)
+
+## Upgrade Instructions
+`ionic-angular` 3.9.2 is patch release of `ionic-angular` 3.9.1. To upgrade, follow the instructions [here](https://github.com/ionic-team/ionic/blob/master/CHANGELOG.md#390-2017-11-08) for updating to `ionic-angular` 3.9.0. After completing those steps, update the `ionic-angular` version to 3.9.2.
+
+```
+npm install ionic-angular@3.9.2 --save
+```
+
+### Bug Fixes
+
+* **action-sheet:** remove ios inertia scroll to fix flicker ([c463b06](https://github.com/ionic-team/ionic/commit/c463b06)), closes [#13262](https://github.com/ionic-team/ionic/issues/13262)
+
+
+
+<a name="3.9.1"></a>
+## [3.9.1](https://github.com/ionic-team/ionic/compare/v3.9.0...v3.9.1) (2017-11-08)
+
+## Upgrade Instructions
+`ionic-angular` 3.9.1 is patch release of `ionic-angular` 3.9.0. To upgrade, follow the instructions [here](https://github.com/ionic-team/ionic/blob/master/CHANGELOG.md#390-2017-11-08) for updating to `ionic-angular` 3.9.0. After completing those steps, update the `ionic-angular` version to 3.9.1.
+
+```
+npm install ionic-angular@3.9.1 --save
+```
+
+### Bug Fixes
+
+* **datetime:** avoid adding cancel and done button repeatedly ([248a1ce](https://github.com/ionic-team/ionic/commit/248a1ce))
+
+
+
+<a name="3.9.0"></a>
+# [3.9.0](https://github.com/ionic-team/ionic/compare/v3.8.0...v3.9.0) (2017-11-08)
+
+### Upgrade Instructions
+`ionic-angular` 3.9.0 adds support for `@angular` 5.0.0 :tada:! It is a drop-in replacement for `ionic-angular` 3.8.x.
+
+To update, remove existing `node_modules` and any lock files, and then update `package.json` to the following deps.
+
+```
+"dependencies" : {
+  ...
+  "@angular/common": "5.0.0",
+  "@angular/compiler": "5.0.0",
+  "@angular/compiler-cli": "5.0.0",
+  "@angular/core": "5.0.0",
+  "@angular/forms": "5.0.0",
+  "@angular/http": "5.0.0",
+  "@angular/platform-browser": "5.0.0",
+  "@angular/platform-browser-dynamic": "5.0.0",
+  "@ionic/storage": "2.1.3",
+  "ionic-angular": "3.9.0",
+  "rxjs": "5.5.2",
+  "zone.js": "0.8.18"
+  ...
+},
+"devDependencies: {
+  "@ionic/app-scripts": "3.1.0",
+  "typescript" : "2.4.2"
+}
+```
+
+If your app uses RXJS, see the instructions below to update.
+
+### RXJS 5.5.2 Updates
+
+The recent update of RXJS includes a change in how operators are applied.
+
+Traditionally, operators were applied like this:
+
+```typescript
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/switchMap';
+
+export MyClass {
+
+
+  someMethod(){
+    // Using Reactive Forms
+    this.input.valueChanges
+    .debounceTime(500)
+    .switchMap(inputVal => this.service.get(inputVal))
+    .subscribe(res => console.log(res))
+  }
+}
+```
+
+This approach involved modifying the Observable prototype and patching on the
+methods.
+
+RXJS 5.5 introduces a different way to do this that can lead to significantly
+smaller code bundles, lettable operators.
+
+To use lettable operators, modify the code from above to look like this:
+
+```typescript
+//Use Deep imports here for smallest bunlde size
+import { debounceTime } from 'rxjs/operators/debounceTime';
+import { switch } from 'rxjs/operators/switchMap';
+
+export MyClass {
+
+
+  someMethod(){
+    // Using Reactive Forms
+    // We use the new `.pipe` method on the observable
+    // too apply operators now
+
+    this.input.valueChanges
+    .pipe(
+      debounceTime(500),
+      switchMap(inputVal => this.service.get(inputVal))
+    )
+    .subscribe(res => console.log(res))
+  }
+}
+```
+
+This slight change allows only import the operators we need in our code. This will result in a smaller, faster application. This example uses Deep Imports, which allow the module we want to import to be isolated.
+
+Take a look at [this
+doc](https://github.com/ReactiveX/rxjs/blob/master/doc/lettable-operators.md) for more information.
+
+### Bug Fixes
+
+* **action-sheet:** move box-shadow to first group ([4f3e91b](https://github.com/ionic-team/ionic/commit/4f3e91b))
+* **alert:** focus input after it is ready ([#13259](https://github.com/ionic-team/ionic/issues/13259)) ([e555eae](https://github.com/ionic-team/ionic/commit/e555eae))
+* **datetime:** use spread operator to copy pickerOptions ([#13202](https://github.com/ionic-team/ionic/issues/13202)) ([2ab8385](https://github.com/ionic-team/ionic/commit/2ab8385)), closes [#11641](https://github.com/ionic-team/ionic/issues/11641)
+* **input:** better support for WKKeyboard ([#13106](https://github.com/ionic-team/ionic/issues/13106)) ([e7ac15f](https://github.com/ionic-team/ionic/commit/e7ac15f))
+* **tabs:** no safe area padding for top tabs ([236e7f8](https://github.com/ionic-team/ionic/commit/236e7f8))
+* **tap-click:** clear activated state on activable element when appropriate ([#13258](https://github.com/ionic-team/ionic/issues/13258)) ([5742540](https://github.com/ionic-team/ionic/commit/5742540)), closes [#13044](https://github.com/ionic-team/ionic/issues/13044)
+* **VirtualScroll:** stop from resizing while out of view ([#13143](https://github.com/ionic-team/ionic/issues/13143)) ([6978bb5](https://github.com/ionic-team/ionic/commit/6978bb5))
+
+
+
+<a name="3.8.0"></a>
+# [3.8.0](https://github.com/ionic-team/ionic/compare/v3.7.1...v3.8.0) (2017-10-26)
+
+
+### Upgrade Instructions
+
+This release includes improvements for iOS11 and specifically, the iPhone X. Please also read over the [iOS 11 checklist](http://blog.ionic.io/ios-11-checklist/) blog post for additional information.
+
+To update, install the latest version of `ionic-angular` and `@ionic/app-scripts`:
+
+```bash
+npm install ionic-angular@latest --save
+npm install @ionic/app-scripts@latest --save-dev
+```
+
+This release uses version `4.4.4` of Angular. Please update the version number of any `@angular` packages in your `package.json` file:
+
+```
+  "dependencies": {
+    "@angular/common": "4.4.4",
+    "@angular/compiler": "4.4.4",
+    "@angular/compiler-cli": "4.4.4",
+    "@angular/core": "4.4.4",
+    "@angular/forms": "4.4.4",
+    "@angular/http": "4.4.4",
+    "@angular/platform-browser": "4.4.4",
+    "@angular/platform-browser-dynamic": "4.4.4",
+    ...
+  }
+```
+
+### Bug Fixes
+
+* **action-sheet:** fix action sheet so it will scroll when the options exceed the screen ([#13049](https://github.com/ionic-team/ionic/issues/13049)) ([199cb00](https://github.com/ionic-team/ionic/commit/199cb00))
+* **content:** reize on orientationchange only ([6b848a0](https://github.com/ionic-team/ionic/commit/6b848a0))
+* **cordova:** size footer correctly ([33960f1](https://github.com/ionic-team/ionic/commit/33960f1))
+* **item:** safe-padding on last item only ([af36358](https://github.com/ionic-team/ionic/commit/af36358))
+* **nav:** remove bad assert ([ae4be66](https://github.com/ionic-team/ionic/commit/ae4be66))
+* **navigation:** account for condition of toggling one view with tabs to another view with tabs ([c963745](https://github.com/ionic-team/ionic/commit/c963745))
+* **navigation:** add defaultHistory support to ion-tabs ([2646ebe](https://github.com/ionic-team/ionic/commit/2646ebe))
+* **navigation:** unregister root navs when appropriate ([2bd89fe](https://github.com/ionic-team/ionic/commit/2bd89fe))
+* **overlay:** onWillDismiss is called as expected ([#12056](https://github.com/ionic-team/ionic/issues/12056)) ([c91223b](https://github.com/ionic-team/ionic/commit/c91223b)), closes [#11702](https://github.com/ionic-team/ionic/issues/11702)
+* **popover:** improve positioning in ios11 ([73f6a82](https://github.com/ionic-team/ionic/commit/73f6a82))
+* **select:** overlay types should use shared interface ([c4e9b5d](https://github.com/ionic-team/ionic/commit/c4e9b5d)), closes [#13103](https://github.com/ionic-team/ionic/issues/13103)
+* **swiper:** add safe-guards when user tries to zoom a slide without an image ([#12931](https://github.com/ionic-team/ionic/issues/12931)) ([e0c8309](https://github.com/ionic-team/ionic/commit/e0c8309)), closes [#12861](https://github.com/ionic-team/ionic/issues/12861)
+* **swiper:** allow for multiple swipers on a page ([#12213](https://github.com/ionic-team/ionic/issues/12213)) ([dd66f9a](https://github.com/ionic-team/ionic/commit/dd66f9a)), closes [#12008](https://github.com/ionic-team/ionic/issues/12008)
+* **tabs:** emit viewDidEnter and viewDidLeave on app during tab change ([c8be8e2](https://github.com/ionic-team/ionic/commit/c8be8e2))
+* **tabs:** return promises where appropriate ([a77bb2c](https://github.com/ionic-team/ionic/commit/a77bb2c))
+* **virtual-scroll:** flickering issue fixes ([88b2e83](https://github.com/ionic-team/ionic/commit/88b2e83))
+* **viewController** move resize logic to viewCtrl ([ebdf22d](https://github.com/ionic-team/ionic/commit/ebdf22d))
+
+
+### Features
+
+* **alert:** export AlertButton interface ([0ba33d9](https://github.com/ionic-team/ionic/commit/0ba33d9)), closes [#12545](https://github.com/ionic-team/ionic/issues/12545)
+* **input:** add dir attribute for different language directions ([#13043](https://github.com/ionic-team/ionic/issues/13043)) ([b180351](https://github.com/ionic-team/ionic/commit/b180351))
+* improved ios11 support ([49e0c37](https://github.com/ionic-team/ionic/commit/49e0c37))
+
+
+
 <a name="3.7.1"></a>
 ## [3.7.1](https://github.com/ionic-team/ionic/compare/v3.7.0...v3.7.1) (2017-09-29)
 
