@@ -445,7 +445,7 @@ export function writeToNodes(plt: Platform, nodes: VirtualNode[], cells: Virtual
  */
 export function adjustRendered(cells: VirtualCell[], data: VirtualData) {
 
-  const maxRenderHeight = (data.renderHeight - data.itmHeight);
+  const maxRenderHeight = ((data.renderHeight ? data.renderHeight : 0) - data.itmHeight);
   const totalCells = cells.length;
   const viewableRenderedPadding = (data.itmHeight < 90 ? VIEWABLE_RENDERED_PADDING : 0);
 

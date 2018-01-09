@@ -6,7 +6,7 @@ import { isTrueProperty } from '../../util/util';
 import { NavController } from '../../navigation/nav-controller';
 import { ToolbarBase } from './toolbar-base';
 import { ViewController } from '../../navigation/view-controller';
-
+import { OnChanges } from '@angular/core';
 
 /**
  * @name Navbar
@@ -64,7 +64,7 @@ import { ViewController } from '../../navigation/view-controller';
     '[class.statusbar-padding]': '_sbPadding'
   }
 })
-export class Navbar extends ToolbarBase {
+export class Navbar extends ToolbarBase implements OnChanges {
   /**
    * @hidden
    */
@@ -138,6 +138,10 @@ export class Navbar extends ToolbarBase {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  ngOnChanges(){
+      this._app.setTitle(this.getTitleText());
   }
 
   /**
