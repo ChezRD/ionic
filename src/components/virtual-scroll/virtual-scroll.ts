@@ -503,7 +503,7 @@ export class VirtualScroll implements DoCheck, OnChanges, AfterContentInit, OnDe
   writeUpdate(needClean: boolean) {
     console.debug('virtual-scroll', 'writeUpdate need clean:', needClean);
     const data = this._data;
-    const stopAtHeight = (data.scrollTop + data.renderHeight);
+    const stopAtHeight = (data.scrollTop + (data && data.renderHeight ? data.renderHeight : 0));
     data.scrollDiff = SCROLL_DIFFERENCE_MINIMUM + 1;
 
     processRecords(stopAtHeight,
@@ -679,7 +679,7 @@ export class VirtualScroll implements DoCheck, OnChanges, AfterContentInit, OnDe
 
     if (diff > 0) {
       // load data we may not have processed yet
-      var stopAtHeight = (data.scrollTop + data.renderHeight);
+      var stopAtHeight = (data.scrollTop + (data.renderHeight ? data.renderHeight : 0));
 
       processRecords(stopAtHeight, records, cells,
         this._hdrFn, this._ftrFn, data);
