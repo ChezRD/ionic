@@ -29,33 +29,45 @@ export class ModuleLoader {
 
     const splitString = modulePath.split(SPLITTER);
 
-    let promise = this._promiseMap.get(modulePath);
-    if (!promise) {
-      promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
-      promise.catch(() => {
-          this._promiseMap.delete(modulePath);
+    return new Promise( (resolve) => {
+        let promise = this._promiseMap.get(modulePath);
 
-          let promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
-          this._promiseMap.set(modulePath, promise);
+        const resolvePromisedModule = ( loadedModule: NgModuleFactory<any> ) => {
+              console.timeEnd(`ModuleLoader, load: ${modulePath}'`);
+              const ref = loadedModule.create(this._injector);
+              const component = ref.injector.get(LAZY_LOADED_TOKEN);
 
-          return promise;
-      });
+              this._cfrMap.set(component, ref.componentFactoryResolver);
 
-      this._promiseMap.set(modulePath, promise);
-    }
+              resolve({
+                  componentFactoryResolver: ref.componentFactoryResolver,
+                  component: component
+              });
+        };
 
-    return promise.then(loadedModule => {
-      console.timeEnd(`ModuleLoader, load: ${modulePath}'`);
-      const ref = loadedModule.create(this._injector);
-      const component = ref.injector.get(LAZY_LOADED_TOKEN);
+        const generatePromise = ( splitString: Array<string> ) => {
+            let promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
+            this._promiseMap.set(modulePath, promise);
 
-      this._cfrMap.set(component, ref.componentFactoryResolver);
+            return promise;
+        };
 
-      return {
-        componentFactoryResolver: ref.componentFactoryResolver,
-        component: component
-      };
-    });
+        if (!promise) {
+            promise = generatePromise( splitString );
+
+            promise.catch(() => {
+                this._promiseMap.delete(modulePath);
+
+                promise = generatePromise( splitString );
+
+                promise.then( loadedModule => resolvePromisedModule(loadedModule) );
+            });
+        }
+
+        promise.then( loadedModule => resolvePromisedModule(loadedModule) );
+    })
+
+
   }
 
   getComponentFactoryResolver(component: Type<any>) {
