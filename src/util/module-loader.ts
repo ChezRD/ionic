@@ -32,6 +32,15 @@ export class ModuleLoader {
     let promise = this._promiseMap.get(modulePath);
     if (!promise) {
       promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
+      promise.catch(() => {
+          this._promiseMap.delete(modulePath);
+
+          let promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
+          this._promiseMap.set(modulePath, promise);
+
+          return promise;
+      });
+
       this._promiseMap.set(modulePath, promise);
     }
 
