@@ -517,7 +517,7 @@ export class Content extends Ion implements OnDestroy, AfterViewInit, IContent {
    */
   scrollTo(x: number, y: number, duration: number = 300, done?: Function): Promise<any> {
     console.debug(`content, scrollTo started, y: ${y}, duration: ${duration}`);
-    return this._scroll.scrollTo(x, y, duration, done);
+    return this._scroll && this._scroll.scrollTo(x, y, duration, done);
   }
 
   /**
@@ -528,7 +528,7 @@ export class Content extends Ion implements OnDestroy, AfterViewInit, IContent {
    */
   scrollToTop(duration: number = 300) {
     console.debug(`content, scrollToTop, duration: ${duration}`);
-    return this._scroll.scrollToTop(duration);
+    return this._scroll && this._scroll.scrollToTop(duration);
   }
 
   /**
@@ -539,7 +539,7 @@ export class Content extends Ion implements OnDestroy, AfterViewInit, IContent {
    */
   scrollToBottom(duration: number = 300) {
     console.debug(`content, scrollToBottom, duration: ${duration}`);
-    return this._scroll.scrollToBottom(duration);
+    return this._scroll && this._scroll.scrollToBottom(duration);
   }
 
   /**

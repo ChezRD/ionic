@@ -14,65 +14,47 @@ export const LAZY_LOADED_TOKEN = new InjectionToken<any>('LZYCMP');
 @Injectable()
 export class ModuleLoader {
 
-  /** @internal */
-  _cfrMap = new Map<any, ComponentFactoryResolver>();
+    /** @internal */
+    _cfrMap = new Map<any, ComponentFactoryResolver>();
 
-  _promiseMap = new Map<string, Promise<NgModuleFactory<any>>>();
+    _promiseMap = new Map<string, Promise<NgModuleFactory<any>>>();
 
-  constructor(
-    private _ngModuleLoader: NgModuleLoader,
-    private _injector: Injector) {}
+    constructor(
+        private _ngModuleLoader: NgModuleLoader,
+        private _injector: Injector) {}
 
 
-  load(modulePath: string): Promise<LoadedModule> {
-    console.time(`ModuleLoader, load: ${modulePath}'`);
+    load(modulePath: string): Promise<LoadedModule> {
+        console.time(`ModuleLoader, load: ${modulePath}'`);
 
-    const splitString = modulePath.split(SPLITTER);
+        const splitString = modulePath.split(SPLITTER);
 
-    return new Promise( (resolve) => {
         let promise = this._promiseMap.get(modulePath);
-
-        const resolvePromisedModule = ( loadedModule: NgModuleFactory<any> ) => {
-              console.timeEnd(`ModuleLoader, load: ${modulePath}'`);
-              const ref = loadedModule.create(this._injector);
-              const component = ref.injector.get(LAZY_LOADED_TOKEN);
-
-              this._cfrMap.set(component, ref.componentFactoryResolver);
-
-              resolve({
-                  componentFactoryResolver: ref.componentFactoryResolver,
-                  component: component
-              });
-        };
-
-        const generatePromise = ( splitString: Array<string> ) => {
-            let promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
-            this._promiseMap.set(modulePath, promise);
-
-            return promise;
-        };
-
         if (!promise) {
-            promise = generatePromise( splitString );
-
+            promise = this._ngModuleLoader.load(splitString[0], splitString[1]);
+            this._promiseMap.set(modulePath, promise);
             promise.catch(() => {
                 this._promiseMap.delete(modulePath);
-
-                promise = generatePromise( splitString );
-
-                promise.then( loadedModule => resolvePromisedModule(loadedModule) );
             });
         }
 
-        promise.then( loadedModule => resolvePromisedModule(loadedModule) );
-    })
+        return promise.then(loadedModule => {
+            console.timeEnd(`ModuleLoader, load: ${modulePath}'`);
+            const ref = loadedModule.create(this._injector);
+            const component = ref.injector.get(LAZY_LOADED_TOKEN);
 
+            this._cfrMap.set(component, ref.componentFactoryResolver);
 
-  }
+            return {
+                componentFactoryResolver: ref.componentFactoryResolver,
+                component: component
+            };
+        });
+    }
 
-  getComponentFactoryResolver(component: Type<any>) {
-    return this._cfrMap.get(component);
-  }
+    getComponentFactoryResolver(component: Type<any>) {
+        return this._cfrMap.get(component);
+    }
 }
 
 const SPLITTER = '#';
@@ -82,13 +64,13 @@ const SPLITTER = '#';
  * @hidden
  */
 export function provideModuleLoader(ngModuleLoader: NgModuleLoader, injector: Injector) {
-  return new ModuleLoader(ngModuleLoader, injector);
+    return new ModuleLoader(ngModuleLoader, injector);
 }
 
 
 export interface LoadedModule {
-  componentFactoryResolver: ComponentFactoryResolver;
-  component: Type<any>;
+    componentFactoryResolver: ComponentFactoryResolver;
+    component: Type<any>;
 }
 
 
@@ -96,37 +78,37 @@ export interface LoadedModule {
  * @hidden
  */
 export function setupPreloadingImplementation(config: Config, deepLinkConfig: DeepLinkConfig, moduleLoader: ModuleLoader): Promise<any> {
-  if (!deepLinkConfig || !deepLinkConfig.links || !config.getBoolean('preloadModules')) {
-    return Promise.resolve();
-  }
-  const linksToLoad = deepLinkConfig.links.filter(link => !!link.loadChildren && link.priority !== 'off');
+    if (!deepLinkConfig || !deepLinkConfig.links || !config.getBoolean('preloadModules')) {
+        return Promise.resolve();
+    }
+    const linksToLoad = deepLinkConfig.links.filter(link => !!link.loadChildren && link.priority !== 'off');
 
-  // Load the high priority modules first
-  const highPriorityPromises = linksToLoad
-    .filter(link => link.priority === 'high')
-    .map(link => moduleLoader.load(link.loadChildren));
+    // Load the high priority modules first
+    const highPriorityPromises = linksToLoad
+        .filter(link => link.priority === 'high')
+        .map(link => moduleLoader.load(link.loadChildren));
 
-  return Promise.all(highPriorityPromises).then(() => {
-    // Load the low priority modules after the high priority are done
-    const lowPriorityPromises = linksToLoad
-      .filter(link => link.priority === 'low')
-      .map(link => moduleLoader.load(link.loadChildren));
+    return Promise.all(highPriorityPromises).then(() => {
+        // Load the low priority modules after the high priority are done
+        const lowPriorityPromises = linksToLoad
+            .filter(link => link.priority === 'low')
+            .map(link => moduleLoader.load(link.loadChildren));
 
-    return Promise.all(lowPriorityPromises);
-  }).catch(err => {
-    console.error(err.message);
-  });
+        return Promise.all(lowPriorityPromises);
+    }).catch(err => {
+        console.error(err.message);
+    });
 }
 
 /**
  * @hidden
  */
 export function setupPreloading(config: Config, deepLinkConfig: DeepLinkConfig, moduleLoader: ModuleLoader, ngZone: NgZone) {
-  return function() {
-    requestIonicCallback(() => {
-      ngZone.runOutsideAngular(() => {
-        setupPreloadingImplementation(config, deepLinkConfig, moduleLoader);
-      });
-    });
-  };
+    return function() {
+        requestIonicCallback(() => {
+            ngZone.runOutsideAngular(() => {
+                setupPreloadingImplementation(config, deepLinkConfig, moduleLoader);
+            });
+        });
+    };
 }
