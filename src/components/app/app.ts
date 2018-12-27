@@ -116,7 +116,7 @@ export class App {
    * @param {string} val  Value to set the document title to.
    */
   setTitle(val: string) {
-    if (val !== this._title) {
+    if (val !== this._title && val) {
       this._title = val;
       document.title = val;
       this._titleSrv.setTitle(val);
